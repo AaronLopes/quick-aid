@@ -7,16 +7,28 @@
 //
 
 import UIKit
+import Firebase
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
     var window: UIWindow?
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        FirebaseApp.configure()
+        
+        UNUserNotificationCenter.current().delegate = self
         // Override point for customization after application launch.
+        
         return true
+    }
+    
+    func application(_ application: UIApplication, didReceive notification: UNNotificationRequest){
+        let sb = UIStoryboard(name: "Main", bundle: nil)
+        let otherVC = sb.instantiateViewController(withIdentifier: "SaveVC") as! SaveVC
+        window?.rootViewController = otherVC;
+        
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -41,6 +53,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-
+    func registerForPushNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
+            (granted, error) in
+            print("Permission granted: \(granted)")
+        }
+    }
 }
 
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler(.alert)
+    }
+    
+}
